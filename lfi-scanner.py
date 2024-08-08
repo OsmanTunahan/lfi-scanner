@@ -14,6 +14,7 @@ class HTTPClient:
         return requests.get(url, headers=self.headers, proxies=self.proxies, allow_redirects=False, verify=False)
     
 
+# Base Output Handler Class
 class OutputHandler:
     def write_output(self, lines):
         raise NotImplementedError("Subclasses should implement this!")
