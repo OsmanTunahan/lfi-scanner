@@ -96,3 +96,20 @@ class LFIEngine:
         else:
             pool.close()
         pool.join()
+
+def main():
+    parser = argparse.ArgumentParser(description='LFI Scanner Tool by @OsmanTunahan')
+    parser.add_argument('-u', metavar='<URL>', help='Example: -u http://lfi.location/?parameter=', required=True)
+    parser.add_argument('-w', metavar='<Wordlist file>', help="Example: -w payloads/unix.txt", required=True)
+    parser.add_argument('-l', metavar='<LFI Payload>', help="Example: -l ../../../../../", required=True)
+    parser.add_argument('-pid', metavar='<Set max pid value>', default='1000', help="Default is 1000. Example: -pid 2000", required=False)
+    parser.add_argument('-o', metavar='<Output file>', help="Example: -o output.txt", required=False)
+    parser.add_argument('-t', metavar='<Threads>', default="10", help="Example: -t 100. Default 10", required=False)
+    parser.add_argument('-H', metavar='<Header>', help="Example -H 'Parameter: Value'", required=False)
+    parser.add_argument('-c', metavar='<Cookie>', help="Example -c 'Cookie Value'", required=False)
+    parser.add_argument('-a', metavar='<User-Agent>', help="Example: -a Linux", required=False)
+    parser.add_argument('-p', metavar='<Proxies>', help="Example: -p 127.0.0.1:8080", required=False)
+    args = parser.parse_args()
+
+if __name__ == "__main__":
+    main()
