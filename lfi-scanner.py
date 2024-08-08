@@ -74,3 +74,25 @@ class ProcessLFIHunt(LFIHuntBase):
         else:
             print(f"No process info found for PID {pid}")
             print("\033[31m" + "*" * 100 + "\x1b[0m")
+
+class LFIEngine:
+    def __init__(self, url, lfi_payload, check_size, output_handler, threads):
+        self.url = url
+        self.lfi_payload = lfi_payload
+        self.check_size = check_size
+        self.output_handler = output_handler
+        self.threads = threads
+
+    def run_hunt(self, hunter_class, wordlist):
+        original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
+        pool = Pool(processes=int(self.threads))
+        signal.signal(signal.SIGINT, original_sigint_handler)
+        
+        try:
+            hunter = hunter_class(self.url, self.lfi_payload, self.check_size, self.output_handler)
+            pool.map(hunter.hunt, wordlist)
+        except KeyboardInterrupt:
+            pool.terminate()
+        else:
+            pool.close()
+        pool.join()
