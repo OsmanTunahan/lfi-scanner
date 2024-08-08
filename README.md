@@ -39,5 +39,5 @@ python lfi-scanner.py -u <URL> -w <Wordlist file> -l <LFI Payload> [options]
 ### Example
 
 ```sh
-python lfi_enumeration_tool.py -u http://example.com/index.php?page= -w payloads/unix.txt -l ../../../../../ -o output.txt -t 20 -H 'Authorization: Bearer token' -c 'sessionid=abcd1234' -a 'Mozilla/5.0' -p 127.0.0.1:8080
+python lfi-scanner.py -u http://example.com/index.php?page= -w payloads/unix.txt -l ../../../../../ -o output.txt -t 20 -H 'Authorization: Bearer token' -c 'sessionid=abcd1234' -a 'Mozilla/5.0' -p 127.0.0.1:8080
 ```
