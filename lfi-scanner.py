@@ -31,3 +31,15 @@ class ConsoleOutputHandler(OutputHandler):
     def write_output(self, lines):
         for line in lines:
             print(line)
+
+
+# Base LFI Hunt Class
+class LFIHuntBase:
+    def __init__(self, url, lfi_payload, check_size, output_handler):
+        self.url = url
+        self.lfi_payload = lfi_payload
+        self.check_size = check_size
+        self.output_handler = output_handler
+
+    def hunt(self, payload_suffix):
+        raise NotImplementedError("Subclasses should implement this!")
